@@ -110,12 +110,20 @@
 
       const constraints = {
         video: {
-          deviceId: selectedDeviceId,
-          facingMode: { ideal: "environment" },
+          deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
+          facingMode: selectedDeviceId ? undefined : "environment", // Utilise la caméra arrière par défaut
           width: { ideal: 1920 },
-          height: { ideal: 1080 }
+          height: { ideal: 1080 },
+          // Ajout des capacités avancées pour les smartphones
+          advanced: [{
+            zoom: true,
+            autoFocus: true,
+            whiteBalance: true,
+            exposureMode: "auto"
+          }]
         }
       };
+      
       mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       videoElement.srcObject = mediaStream;
       
@@ -124,6 +132,41 @@
       updateDisplay();
     } catch (error) {
       console.error('Erreur lors de l\'accès à la webcam : ', error);
+      // En cas d'erreur, essayer avec des contraintes plus basiques
+      try {
+        const basicConstraints = {
+          video: {
+            facingMode: "environment"
+          }
+        };
+        mediaStream = await navigator.mediaDevices.getUserMedia(basicConstraints);
+        videoElement.srcObject = mediaStream;
+        await videoElement.play();
+        updateDisplay();
+      } catch (fallbackError) {
+        console.error('Erreur même avec les contraintes basiques : ', fallbackError);
+      }
+    }
+  }
+
+  // Ajouter une fonction pour basculer entre les caméras
+  async function switchCamera() {
+    const currentTrack = mediaStream?.getVideoTracks()[0];
+    const currentFacingMode = currentTrack?.getSettings()?.facingMode;
+    
+    try {
+      const newFacingMode = currentFacingMode === "environment" ? "user" : "environment";
+      const constraints = {
+        video: {
+          facingMode: newFacingMode,
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      };
+      
+      await startCapture();
+    } catch (error) {
+      console.error('Erreur lors du changement de caméra : ', error);
     }
   }
 
@@ -314,18 +357,28 @@
           <p>Vue {currentExposureIndex + 1} / {exposureCount}</p>
     {/if}
       </div>
-  </div>
+    </div>
 
-    <div class="capture-button-container">
+    <div class="camera-controls">
       <button 
-        class="capture-button" 
-        on:click={capturePhoto}
-        aria-label="Prendre une photo"
+        class="switch-camera" 
+        on:click={switchCamera}
+        aria-label="Changer de caméra"
       >
-        {#if exposureCount > 1 && currentExposureIndex > 0}
-          <div class="exposure-counter">{currentExposureIndex + 1}/{exposureCount}</div>
-      {/if}
+        📷
       </button>
+      
+      <div class="capture-button-container">
+        <button 
+          class="capture-button" 
+          on:click={capturePhoto}
+          aria-label="Prendre une photo"
+        >
+          {#if exposureCount > 1 && currentExposureIndex > 0}
+            <div class="exposure-counter">{currentExposureIndex + 1}/{exposureCount}</div>
+          {/if}
+        </button>
+      </div>
     </div>
 
     <div class="controls-right">
@@ -576,12 +629,20 @@
     object-fit: cover;
   }
 
-  .capture-button-container {
+  .camera-controls {
     position: fixed;
     bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 91;
+  }
+
+  .capture-button-container {
+    position: relative;
+    margin: 0 auto;
   }
 
   .capture-button {
@@ -685,5 +746,26 @@
     max-width: 100%;
     max-height: 90vh;
     object-fit: contain;
+  }
+
+  .switch-camera {
+    position: absolute;
+    left: calc(50% - 100px); /* Ajustez cette valeur selon vos besoins */
+    bottom: 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  .switch-camera:active {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
   }
 </style> 
