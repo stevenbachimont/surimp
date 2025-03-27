@@ -317,9 +317,9 @@
   </div>
 
   <div class="controls">
-    <div class="controls-left">
+    <div class="controls-top">
       <div class="slider-control">
-            <input 
+        <input 
           type="range" 
           id="exposure" 
           min="-2" 
@@ -328,20 +328,25 @@
           bind:value={exposure}
         >
         <label for="exposure">EXP {exposure > 0 ? '+' : ''}{exposure}</label>
-        </div>
-
-      <div class="exposure-control">
-        <input 
-          type="number" 
-          id="exposureCount" 
-          min="1" 
-          max="10" 
-          bind:value={exposureCount}
-        >
-        {#if exposureCount > 1 && currentExposureIndex > 0}
-          <p>Vue {currentExposureIndex + 1} / {exposureCount}</p>
-    {/if}
       </div>
+
+      <div class="slider-control">
+        <input 
+          type="range" 
+          id="contrast" 
+          min="0" 
+          max="200" 
+          bind:value={contrast}
+        >
+        <label for="contrast">CON {contrast}%</label>
+      </div>
+
+      <button 
+        class="invert-button {isInverted ? 'active' : ''}" 
+        on:click={() => isInverted = !isInverted}
+      >
+        INV {isInverted ? "ON" : "OFF"}
+      </button>
     </div>
 
     <div class="camera-controls">
@@ -364,26 +369,23 @@
           {/if}
         </button>
       </div>
-    </div>
 
-    <div class="controls-right">
-      <div class="slider-control">
-        <input 
-          type="range" 
-          id="contrast" 
-          min="0" 
-          max="200" 
-          bind:value={contrast}
-        >
-        <label for="contrast">CON {contrast}%</label>
+      <div class="right-controls">
+        <div class="exposure-control">
+          <button on:click={() => exposureCount = Math.max(1, exposureCount - 1)}>-</button>
+          <input 
+            type="number" 
+            id="exposureCount" 
+            min="1" 
+            max="10" 
+            bind:value={exposureCount}
+          >
+          <button on:click={() => exposureCount = Math.min(10, exposureCount + 1)}>+</button>
+          {#if exposureCount > 1 && currentExposureIndex > 0}
+            <p>Vue {currentExposureIndex + 1} / {exposureCount}</p>
+          {/if}
+        </div>
       </div>
-
-      <button 
-        class={isInverted ? 'active' : ''} 
-        on:click={() => isInverted = !isInverted}
-      >
-        {isInverted ? "-" : "+"}
-      </button>
     </div>
   </div>
 
@@ -451,57 +453,71 @@
 
   .controls {
     position: fixed;
-    bottom: 20px;
+    bottom: 120px; /* Augmenté de 20px à 120px pour remonter les contrôles */
     left: 0;
     right: 0;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    padding: 1rem;
+    gap: 20px;
     z-index: 89;
   }
 
-  .controls-left, .controls-right {
-    position: fixed;
-    right: 1rem;
+  .controls-top {
     display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 0.5rem;
-    border-radius: 12px;
-    height: 40px;
     align-items: center;
-    width: 200px;
+    gap: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 12px;
+    width: auto;
     justify-content: center;
   }
 
-  .controls-left {
-    bottom: 20px;
-  }
-
-  .controls-right {
-    bottom: calc(20px + 50px);
+  .slider-control {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
   }
 
   .exposure-control {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-    justify-content: space-between;
+    gap: 8px;
   }
 
   .exposure-control input[type="number"] {
-    width: 2.5rem;
+    width: 4rem;
+    height: 40px;
     text-align: center;
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    border-radius: 8px;
-    padding: 0.2rem;
-    height: 25px;
+    border-radius: 12px;
+    padding: 8px;
+    font-size: 1.2rem;
+    -moz-appearance: textfield; /* Supprime les flèches sur Firefox */
+  }
+
+  /* Supprime les flèches sur Chrome/Safari/Edge */
+  .exposure-control input[type="number"]::-webkit-inner-spin-button,
+  .exposure-control input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .exposure-control button {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
   }
 
   .display-canvas {
@@ -622,6 +638,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 20px;
     z-index: 91;
   }
 
@@ -673,40 +690,6 @@
     z-index: 2;
   }
 
-  .slider-control {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.3rem;
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .slider-control input[type="range"] {
-    width: 120px;
-    appearance: none;
-    -webkit-appearance: none;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    height: 4px;
-  }
-  
-  .slider-control input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px;
-    height: 16px;
-    background: white;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-  
-  .slider-control label {
-    color: white;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    text-align: center;
-  }
-
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -735,7 +718,7 @@
 
   .switch-camera {
     position: absolute;
-    left: calc(50% - 100px); /* Ajustez cette valeur selon vos besoins */
+    left: calc(50% - 100px); /* Retour à la valeur d'origine */
     bottom: 10px;
     background-color: rgba(255, 255, 255, 0.2);
     border: none;
@@ -752,5 +735,39 @@
   .switch-camera:active {
     background-color: rgba(255, 255, 255, 0.3);
     transform: scale(0.95);
+  }
+
+  .right-controls {
+    position: absolute;
+    left: calc(50% + 60px); /* Garde la nouvelle valeur plus proche */
+    bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 12px;
+  }
+
+  .invert-button {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+  }
+
+  .invert-button.active {
+    background-color: #8b98b9;
+    color: black;
+  }
+
+  /* Ajuste uniquement le côté droit pour les petits écrans */
+  @media (max-width: 360px) {
+    .right-controls {
+      left: calc(50% + 50px);
+    }
   }
 </style> 
