@@ -6,11 +6,11 @@ export default defineConfig({
 	plugins: [svelte()],
 	server: {
 		host: '0.0.0.0',
-		port: 3333
+		port: 3332
 	},
 	preview: {
 		host: '0.0.0.0',
-		port: 3333,
+		port: 3332,
 		allowedHosts: [
 			'numerist.stevenbachimont.com',
 			'localhost'
