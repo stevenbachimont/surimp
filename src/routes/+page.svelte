@@ -108,63 +108,48 @@
         cancelAnimationFrame(animationFrameId);
       }
 
+      // Simplifions les contraintes pour une meilleure compatibilité
       const constraints = {
         video: {
-          deviceId: selectedDeviceId ? { exact: selectedDeviceId } : undefined,
-          facingMode: selectedDeviceId ? undefined : "environment", // Utilise la caméra arrière par défaut
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          // Ajout des capacités avancées pour les smartphones
-          advanced: [{
-            zoom: true,
-            autoFocus: true,
-            whiteBalance: true,
-            exposureMode: "auto"
-          }]
-        }
-      };
-      
-      mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoElement.srcObject = mediaStream;
-      
-      // Attendre que la vidéo soit prête
-      await videoElement.play();
-      updateDisplay();
-    } catch (error) {
-      console.error('Erreur lors de l\'accès à la webcam : ', error);
-      // En cas d'erreur, essayer avec des contraintes plus basiques
-      try {
-        const basicConstraints = {
-          video: {
-            facingMode: "environment"
-          }
-        };
-        mediaStream = await navigator.mediaDevices.getUserMedia(basicConstraints);
-        videoElement.srcObject = mediaStream;
-        await videoElement.play();
-        updateDisplay();
-      } catch (fallbackError) {
-        console.error('Erreur même avec les contraintes basiques : ', fallbackError);
-      }
-    }
-  }
-
-  // Ajouter une fonction pour basculer entre les caméras
-  async function switchCamera() {
-    const currentTrack = mediaStream?.getVideoTracks()[0];
-    const currentFacingMode = currentTrack?.getSettings()?.facingMode;
-    
-    try {
-      const newFacingMode = currentFacingMode === "environment" ? "user" : "environment";
-      const constraints = {
-        video: {
-          facingMode: newFacingMode,
+          facingMode: "environment", // Utilise la caméra arrière par défaut
           width: { ideal: 1920 },
           height: { ideal: 1080 }
         }
       };
       
-      await startCapture();
+      mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      videoElement.srcObject = mediaStream;
+      await videoElement.play();
+      updateDisplay();
+    } catch (error) {
+      console.error('Erreur lors de l\'accès à la webcam : ', error);
+    }
+  }
+
+  async function switchCamera() {
+    try {
+      // Récupérer l'état actuel de la caméra
+      const currentTrack = mediaStream?.getVideoTracks()[0];
+      const currentFacingMode = currentTrack?.getSettings()?.facingMode;
+      
+      // Arrêter le flux actuel
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+
+      // Basculer entre les caméras avant et arrière
+      const newConstraints = {
+        video: {
+          facingMode: currentFacingMode === "user" ? "environment" : "user",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      };
+
+      mediaStream = await navigator.mediaDevices.getUserMedia(newConstraints);
+      videoElement.srcObject = mediaStream;
+      await videoElement.play();
+      updateDisplay();
     } catch (error) {
       console.error('Erreur lors du changement de caméra : ', error);
     }

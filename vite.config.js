@@ -12,7 +12,7 @@ export default defineConfig({
 		host: '0.0.0.0',
 		port: 3332,
 		allowedHosts: [
-			'numerist.stevenbachimont.com',
+			'surimp.stevenbachimont.com',
 			'localhost'
 		]
 	}
