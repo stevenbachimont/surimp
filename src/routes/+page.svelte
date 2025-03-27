@@ -485,20 +485,20 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
   }
 
   .exposure-control input[type="number"] {
-    width: 4rem;
-    height: 40px;
+    width: 2.5rem;
+    height: 30px;
     text-align: center;
     background: rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    border-radius: 12px;
-    padding: 8px;
-    font-size: 1.2rem;
-    -moz-appearance: textfield; /* Supprime les flèches sur Firefox */
+    border-radius: 8px;
+    padding: 4px;
+    font-size: 1rem;
+    -moz-appearance: textfield;
   }
 
   /* Supprime les flèches sur Chrome/Safari/Edge */
@@ -509,15 +509,15 @@
   }
 
   .exposure-control button {
-    width: 40px;
-    height: 40px;
-    font-size: 1.5rem;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
+    border-radius: 8px;
   }
 
   .display-canvas {
