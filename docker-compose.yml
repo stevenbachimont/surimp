@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  numerist:
+    build: .
+    container_name: numerist
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    environment:
+      - NODE_ENV=production
+      - PORT=3333
+      - HOST=0.0.0.0 
